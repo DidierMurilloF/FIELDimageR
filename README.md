@@ -1,5 +1,5 @@
 
-## [FIELDimageR](https://github.com/filipematias23/FIELDimageR): A Tool to Analyze Orthomosaic Images From Agricultural Field Trials in [R](https://www.r-project.org).
+## [FIELDimageR](https://github.com/OpenDroneMap/FIELDimageR): A Tool to Analyze Images From Agricultural Field Trials and Lab in [R](https://www.r-project.org).
 
 > This package is a compilation of functions to analyze orthomosaic images from research fields. To prepare the image it first allows to crop the image, remove soil and weeds and rotate the image. The package also builds a plot shapefile in order to extract information for each plot to evaluate different wavelengths, vegetation indices, stand count, canopy percentage, and plant height.
 
@@ -46,7 +46,7 @@
 **With RStudio**
 
 > First of all, install [R](https://www.r-project.org/) and [RStudio](https://rstudio.com/).
-> Then, in order to install R/FIELDimageR from GitHub [GitHub repository](https://github.com/filipematias23/FIELDimageR), you need to install the following packages in R. For Windows users who have an R version higher than 4.0, you need to install RTools, tutorial [RTools For Windows](https://cran.r-project.org/bin/windows/Rtools/).
+> Then, in order to install R/FIELDimageR from GitHub [GitHub repository](https://github.com/OpenDroneMap/FIELDimageR), you need to install the following packages in R. For Windows users who have an R version higher than 4.0, you need to install RTools, tutorial [RTools For Windows](https://cran.r-project.org/bin/windows/Rtools/).
 
 <br />
 
@@ -54,7 +54,7 @@
 
 ```r
 install.packages("devtools")
-devtools::install_github("filipematias23/FIELDimageR")
+devtools::install_github("OpenDroneMap/FIELDimageR")
 ```
 > If the method above doesn't work, use the next lines by downloading the FIELDimageR-master.zip file
 
@@ -63,7 +63,7 @@ setwd("~/FIELDimageR-master.zip") # ~ is the path from where you saved the file.
 unzip("FIELDimageR-master.zip") 
 file.rename("FIELDimageR-master", "FIELDimageR") 
 shell("R CMD build FIELDimageR") # or system("R CMD build FIELDimageR")
-install.packages("FIELDimageR_0.3.0.tar.gz", repos = NULL, type="source") # Make sure to use the right version (e.g. 0.3.0)
+install.packages("FIELDimageR_0.3.2.tar.gz", repos = NULL, type="source") # Make sure to use the right version (e.g. 0.3.2)
 ```
 <br />
 
@@ -148,7 +148,7 @@ setwd("~/FIELDimageR-master.zip") # ~ is the path from where you saved the file.
 unzip("FIELDimageR-master.zip") 
 file.rename("FIELDimageR-master", "FIELDimageR") 
 system("R CMD build FIELDimageR") #only system works on linux
-install.packages("FIELDimageR_0.3.0.tar.gz", repos = NULL, type="source") # Make sure to use the right version (e.g. 0.3.0)
+install.packages("FIELDimageR_0.3.2.tar.gz", repos = NULL, type="source") # Make sure to use the right version (e.g. 0.3.2)
 
 ```
 <br />
@@ -1175,7 +1175,8 @@ writeRaster(EX1.Indices, filename="EX1.Indices.tif", options="INTERLEAVE=BAND", 
 ### FieldShape file
 library(rgdal)
 writeOGR(EX1.Info$fieldShape, ".", "EX1.fieldShape", driver="ESRI Shapefile")
-# EX1.fieldShape.2 <- readOGR("EX1.fieldShape.shp") # Reading the saved shapefile.
+# EX1.fieldShape.2 <- terra::vect("EX1.fieldShape.shp") # Reading the saved shapefile option 01.
+# EX1.fieldShape.2 <- readOGR("EX1.fieldShape.shp") # Reading the saved shapefile option 02.
 
 ### CSV file (table)
 write.csv(EX1.Info$fieldShape@data,file = "EX1.Info.csv",col.names = T,row.names = F)
@@ -1295,6 +1296,7 @@ EX.Table.Parallel <- foreach(i = 1:length(pics), .packages = c("raster","FIELDim
                        EX.L.Info<- fieldInfo(mosaic=EX.L5, fieldShape=EX.L.Shape$fieldShape, projection=F) # projection=F (Ignore projection. Normally used only with remote sensing images)
                        EX.L.Info$plotValue # Combine information from all images in one table
                      }})
+stopCluster(cl)
 rownames(EX.Table.Parallel)<-pics
 EX.Table.Parallel 
 
@@ -1332,8 +1334,8 @@ rm(previous_mosaic)
 
 4) Using ShapeFile from other software (e.g. [QGIS](https://www.qgis.org/en/site/))
 ```
-library(rgdal)
-ShapeFile <- readOGR("Other_Software_ShapeFile.shp")
+ShapeFile <- rgdal::readOGR("Other_Software_ShapeFile.shp") # Option 01
+ShapeFile <- terra::vect("Other_Software_ShapeFile.shp") # Option 02
 ```
 
 5) Combining ShapeFiles: sometimes it is better to split the mosaic into smaller areas to better draw the shapefile. For instance, the user can combine the split shapefiles to one for the next step as extractions
